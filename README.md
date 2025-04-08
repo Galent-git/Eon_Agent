@@ -1,102 +1,113 @@
 # Eon Agent: A Conceptual Exploration of Self-Reflective AI
 
-## Overview
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Eon Agent is a Python-based conceptual prototype exploring ideas around AI agent metacognition, dynamic functionality, and simulated internal states ("dreaming"). It simulates an agent that processes tasks, reflects on them through generated "dreams," maintains a simple memory, and conceptually explores the idea of self-modification by checking for required functions and *simulating* their generation via Large Language Models (LLMs).
+**Status: Experimental / Conceptual**
 
-**This project is primarily an exploration and thought experiment, not a production-ready or robustly autonomous system.** Its value lies in demonstrating concepts and prompting discussion about the future possibilities and inherent challenges of more sophisticated AI agents.
+Eon Agent is a Python prototype exploring ideas around AI agent metacognition, dynamic functionality, and simulated internal states ("dreaming"). It simulates an agent that processes tasks, reflects on them through generated "dreams," maintains a simple memory, and **conceptually explores the idea of self-modification**.
+
+**Crucially, by default, this agent operates safely.** It checks if necessary Python functions exist locally. If not, it *simulates* the idea of generating them via a Large Language Model (LLM) by logging a message, but **does not actually generate or execute new code, nor modify its own script file.**
+
+This project is primarily an **exploration and thought experiment**, not a production-ready system. Its value lies in demonstrating concepts related to potentially more sophisticated future AI agents and prompting discussion about their possibilities and inherent challenges.
 
 ## Core Concepts Explored
 
-1.  **Task Processing:** The agent accepts natural language queries and attempts to process them, either through pre-defined functions or by leveraging an LLM.
-2.  **Conceptual Self-Writing/Dynamic Functionality:** The agent explores the *idea* of modifying its own capabilities. It includes a mechanism (`check_or_simulate_function`) that checks if specific functions needed for a task (e.g., `generate_report`) exist locally. If not, it logs a message indicating it *would conceptually* use an LLM to generate the required code. **For safety and stability, this prototype does *not* execute dynamically generated code or modify its own script file during runtime by default.** It relies on pre-defined functions if available.
+1.  **Task Processing:** Accepts natural language queries and processes them using either pre-defined local Python functions or a general-purpose LLM call.
+2.  **SAFE Conceptual Self-Writing Simulation (Default Behavior):**
+    *   The agent checks if specific Python functions (e.g., `generate_report`) required for certain tasks exist within its codebase (`eon_agent.py`).
+    *   It uses Python's `importlib` for this check – **no code is generated or executed if the function is missing.**
+    *   If a required function is **not found**, the agent logs a message stating it *would conceptually* use an LLM to generate it, simulating the *idea* of dynamic functionality without the associated risks.
+3.  **Simulated Metacognition ("Dreaming"):** After processing a task, the agent uses an LLM (often with higher 'temperature' settings for creativity) to generate a short, surreal, symbolic "dream" reflecting on the task, exploring non-utilitarian internal states.
+4.  **Memory:** Logs interactions (queries, results) to a persistent JSON file (`memory.json`) and dreams to a Markdown file (`dreams.md`).
+5.  **Multi-LLM Integration:** Designed to flexibly work with different LLM backends:
+    *   OpenAI (GPT-3.5, GPT-4, etc.) via `openai` library.
+    *   Google Gemini (Gemini Pro, Flash, etc.) via `google-generativeai` SDK.
+    *   Local models via Ollama (Llama3, Mistral, etc.) using `requests`.
 
-    *   **Experimental (Unsafe) Code Included:** For purely illustrative and conceptual purposes, the source code (`eon_agent.py`) also contains a separate, **unused by default**, function (`_unsafe_generate_and_append_function`) that demonstrates the *original technical approach* of calling an LLM and appending the generated code to the script file. **This function is accompanied by strong warnings in its docstring and is inherently unsafe.** See the "Ethical Considerations and Limitations" section for more details on the risks.
-3.  **Simulated Metacognition ("Dreaming"):** After processing a task, the agent uses a high-temperature LLM call to generate a surreal, symbolic "dream" reflecting on the task. This explores the idea of non-utilitarian, internal states in AI.
-4.  **Memory:** The agent logs its interactions (queries, results) to a persistent JSON file, providing a basic history.
-5.  **LLM Integration:** Designed to work with multiple LLM backends (OpenAI, Google Gemini, local Ollama models) for flexibility.
+## WARNING: Includes Unsafe Demonstrative Code
 
-## Features
+For purely illustrative and conceptual purposes, the source code (`eon_agent.py`) **also contains a separate function (`_unsafe_generate_and_append_function`)** that demonstrates the original technical *idea* of calling an LLM to generate Python code and append it to the script file.
 
-*   Modular Python class structure.
-*   Simple JSON-based memory persistence.
-*   Markdown file logging for "dreams."
-*   Conceptual simulation of self-writing/dynamic function checking.
-*   Surreal "dream" generation based on task context.
-*   Support for multiple LLM providers:
-    *   OpenAI (via `openai` library)
-    *   Google Gemini (via `google-generativeai` library)
-    *   Ollama (via local API endpoint and `requests`)
-*   Basic logging for monitoring agent activity.
+*   **This function is NOT called by the agent during its normal operation.**
+*   It is **explicitly marked as UNSAFE** and accompanied by strong warnings in the code and comments.
+*   **EXECUTING CODE GENERATED BY AN LLM WITHOUT RIGOROUS SANDBOXING, VALIDATION, AND SECURITY REVIEW IS EXTREMELY DANGEROUS.** It can lead to arbitrary code execution, security vulnerabilities, data loss, and system instability.
+*   An option to run this unsafe function (requiring explicit confirmation) is included in the `if __name__ == "__main__"` block for **demonstration only**. **Do not enable or run this unless you fully understand and accept the significant risks.**
 
-## Tech Stack
+## Technology
 
-*   Python 3.8+
-*   Required Libraries: `openai`, `google-generativeai`, `requests` (install based on chosen LLM provider)
-*   LLM Backend: Access to OpenAI API, Google AI Studio API, or a running local Ollama instance.
+*   **Language:** Python 3.8+
+*   **Core Libraries:** `requests`, `python-dotenv`
+*   **Optional LLM Libraries:** `openai`, `google-generativeai` (install based on chosen provider)
+*   **LLM Backend:** Access to OpenAI API, Google AI Studio API, or a running local Ollama instance.
 
 ## Setup and Usage
 
-1.  **Clone the Repository:**
+1.  **Clone Repository:**
     ```bash
-    git clone <your-repo-link>
-    cd <your-repo-directory>
+    git clone https://github.com/your-username/eon-agent.git # Replace with your repo URL
+    cd eon-agent
     ```
 
-2.  **Install Dependencies:**
+2.  **Create Virtual Environment (Recommended):**
     ```bash
-    # Install libraries based on the LLM(s) you plan to use
-    pip install requests # For Ollama
-    pip install google-generativeai # For Google Gemini
-    pip install openai # For OpenAI
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
 
-3.  **Configure Environment Variables:**
-    *   **For OpenAI:** Set `OPENAI_API_KEY` to your API key.
-    *   **For Google:** Set `GOOGLE_API_KEY` to your API key.
-    *   **For Ollama:** Ensure Ollama is running (e.g., `ollama serve`). You can optionally set `OLLAMA_URL` if it's not running on the default `http://localhost:11434`.
-    *   Set `LLM_PROVIDER` to `openai`, `google`, or `ollama` (defaults to `ollama`).
-    *   Optionally set `MODEL_NAME` to specify a model (e.g., `gpt-4`, `gemini-1.5-pro-latest`, `llama3`); defaults are provided in the script.
+3.  **Install Dependencies:**
+    *   Install base requirements:
+        ```bash
+        pip install -r requirements.txt
+        ```
+    *   Install the library for your chosen LLM provider(s) if not already covered (see `requirements.txt` for package names):
+        ```bash
+        # Example for OpenAI:
+        # pip install openai
+        # Example for Google Gemini:
+        # pip install google-generativeai
+        ```
 
-    *(Example for Bash/Zsh)*
+4.  **Configure Environment Variables:**
+    *   Copy the example file:
+        ```bash
+        cp .env.example .env
+        ```
+    *   **Edit the `.env` file:**
+        *   Set `LLM_PROVIDER` to `openai`, `google`, or `ollama` (defaults to `ollama`).
+        *   Fill in the required API key (`OPENAI_API_KEY` or `GOOGLE_API_KEY`) for your chosen cloud provider. Keys for unused providers can be left as placeholders.
+        *   Optionally, set `MODEL_NAME` to specify a particular model (e.g., `gpt-4`, `gemini-1.5-pro-latest`, `llama3`). Defaults are provided in the script.
+        *   Ensure `OLLAMA_URL` and `OLLAMA_CHECK_URL` are correct if using Ollama and it's not on the default `http://localhost:11434`.
+    *   **Security:** The `.env` file contains secrets. **Do not commit `.env` to Git.** The provided `.gitignore` should prevent this.
+
+5.  **Run Ollama (if using):**
+    If `LLM_PROVIDER` is `ollama`, ensure the Ollama server is running in a separate terminal:
     ```bash
-    export OPENAI_API_KEY='your_openai_key'
-    export GOOGLE_API_KEY='your_google_key'
-    export LLM_PROVIDER='google' # Or 'openai' or 'ollama'
-    # export MODEL_NAME='gemini-1.5-pro-latest' # Optional
+    ollama serve
     ```
+    Also ensure you have pulled the model specified in `.env` or the script default (e.g., `ollama pull mistral`).
 
-4.  **Run the Agent:**
+6.  **Run the Agent:**
     ```bash
     python eon_agent.py
     ```
-    The script will run a few predefined cycles. You can uncomment the interactive loop at the bottom of the script for manual querying.
+    The script will run a few predefined demonstration cycles and then enter an interactive loop where you can type queries. Type `quit` to exit. Check `memory.json` and `dreams.md` for output.
 
 ## Ethical Considerations and Limitations
 
-*   **Self-Modification Risks (Conceptual vs. Unsafe Demo):**
-    *   The agent's default behavior **simulates** self-writing conceptually without executing generated code or modifying files, ensuring basic safety for experimentation.
-    *   The codebase includes an **experimental, unsafe function (`_unsafe_generate_and_append_function`)** that demonstrates the *technical* possibility of LLM-driven code generation and file appending. **This function is NOT called by default and is extremely risky.** Executing LLM-generated code without strict sandboxing, validation, and security reviews can lead to critical vulnerabilities, instability, or unintended behavior. It is included for academic/conceptual demonstration only and should not be enabled or used without fully understanding and mitigating the associated dangers.
-*   **"Dreaming" is Generative:** # ... (Keep existing text) ...
-*   **LLM Reliability:** # ... (Keep existing text) ...
-*   **Basic Memory:** # ... (Keep existing text) ...
-
-# ... (Keep Future Ideas, Contributing) ...
-*   **"Dreaming" is Generative:** The dreams are creative text outputs generated by an LLM based on a prompt. They do not represent genuine consciousness, understanding, or internal subjective experience. It's an exploration of simulating such states.
-*   **LLM Reliability:** The quality of responses, generated code (in simulation), and dreams depends entirely on the capabilities and potential biases of the underlying LLM.
-*   **Basic Memory:** The memory system is simple and non-semantic. The agent doesn't deeply learn from or reason about its past experiences.
+*   **Self-Modification Risks (Handled via Simulation):** The **default safe mode** only simulates the *idea* of self-modification. The **included unsafe demo function** highlights the extreme risks of executing LLM-generated code without safeguards. Use with extreme caution if you choose to explore it.
+*   **"Dreaming" is Generative:** Dreams are creative LLM outputs, not genuine consciousness or subjective experience. It's a simulation exploring such concepts.
+*   **LLM Reliability & Bias:** Output quality depends entirely on the chosen LLM. Biases or inaccuracies in the LLM will be reflected.
+*   **Basic Memory:** Memory is a simple chronological log, not a deep semantic understanding of the past.
+*   **Error Handling:** Basic error handling is included, but complex failures in LLM communication or file access might occur.
 
 ## Future Ideas
 
-*   Implement safer mechanisms for dynamic functionality (e.g., plugin system, sandboxed execution).
-*   Develop a more sophisticated memory system (e.g., vector database for semantic recall).
-*   Allow dreams to subtly influence future task processing or agent "mood."
-*   Explore different "dreaming" techniques beyond simple LLM prompts.
-*   Integrate external tools or APIs for the agent to use.
+*   Implement safer dynamic functionality (e.g., sandboxed code execution, plugin system).
+*   Explore vector databases for semantic memory retrieval.
+*   Allow "dreams" to subtly influence agent state or responses (conceptual "mood").
+*   Integrate external tools/APIs via function calling (if supported by the LLM).
+*   Develop more sophisticated pre-defined functions for the agent to utilize.
 
-## Contributing
+## License
 
-This is a personal exploration project. Feel free to fork, experiment, and share your findings. Discussions about the concepts are welcome.
-
----
-*Conceptualized and built as an exploration into the potential and pitfalls of autonomous, self-reflective AI systems.*
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
